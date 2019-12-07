@@ -476,13 +476,63 @@ int shmdt(memptr);
 		printf("%d ... %s", (buf3+i)->d_nread, (buf3+i)->d_buf);
 	```
 
+## shmctl System call
+
+```c
+#include <sys/shm.h>
+int shmctl (int shmid, int command, struct shmid_ds *shm_stat)
+```
+
+- command
+	- IPC_STAT
+	- IPC_RMID
+
+## record locking
+
+- 필요성
+```
+현재 : X = 100
+P1											P2
+Read X									Read X
+X = X + 100							X = X + 200
+Write X									Write X
+
+P1과 P2의 실행 후 X의 값은?
+```
+
+### locking : 특정 record에 대한 다른 프로세스의 읽기/쓰기 제한
+ - read lock : 읽기는 허용, 쓰기는 제한
+ - write lock : 읽기, 쓰기 모두 제한
+
+### unlocking : 제한 해제
+
+```c
+#include <fcntl.h>
+int fcntl(int filedes, int cmd, struct flock *ldata);
+```
+
+#### <인자>
+- filedes : lock을 설정하려는 file의 descriptor
+	- read-lock은 O_RDONLY / O_RDWR로 open된 file에 한해서 적용 가능
+	- write-lock은 O_WRONLY / O_RDWR로 open된 file에 한해서 적용 가능
+- cmd
+	- F_GETLK : lock 정보 얻기
+		- 해당 정보는 세번째 인수에 저장
+	- F_SETLK : non-blocking locking or unlocking
+		- lock 설정에 관한 자세한 정보는 세번째 인수에 저장
+	- F_SETLKW : blocking locking
+		- lock 설정에 관한 자세한 정보는 세번째 인수에 저장
+- struct flock *ldata
+	- short l_type
+
+
 
 <!--stackedit_data:
-eyJoaXN0b3J5IjpbNzgyNDMwNjQzLC0xOTY5MDM0NzE1LDE3Nz
-E3NTU3NjMsLTEyODc0NDU0MjUsLTE0MTA5MzcyMjcsLTE4MTM0
-NzQ5OTYsMTE5MzU5MTg5NywxMjg1NTYwMDMyLDE2NTc5MTI0OD
-IsLTEzMTE4MjkxMDcsOTg5NzY4MDMxLDg4MzQ0MTk5NCwxMzIx
-NzY2Mjk1LC0xMzYxNTY5MDExLDE5OTIwOTgwNzksNzM3OTcxNj
-kyLDU5NjA4MzQwNSwtMzQ5ODU5OTMzLC0xMDQxNDQzODkxLDE5
-NjIyNjc3NDRdfQ==
+eyJoaXN0b3J5IjpbNzMyMjI3ODksNzgyNDMwNjQzLC0xOTY5MD
+M0NzE1LDE3NzE3NTU3NjMsLTEyODc0NDU0MjUsLTE0MTA5Mzcy
+MjcsLTE4MTM0NzQ5OTYsMTE5MzU5MTg5NywxMjg1NTYwMDMyLD
+E2NTc5MTI0ODIsLTEzMTE4MjkxMDcsOTg5NzY4MDMxLDg4MzQ0
+MTk5NCwxMzIxNzY2Mjk1LC0xMzYxNTY5MDExLDE5OTIwOTgwNz
+ksNzM3OTcxNjkyLDU5NjA4MzQwNSwtMzQ5ODU5OTMzLC0xMDQx
+NDQzODkxXX0=
 -->
