@@ -503,6 +503,15 @@ P1과 P2의 실행 후 X의 값은?
 ### locking : 특정 record에 대한 다른 프로세스의 읽기/쓰기 제한
  - read lock : 읽기는 허용, 쓰기는 제한
  - write lock : 읽기, 쓰기 모두 제한
+	```
+	Lock
+	Read X
+	X = X + 100
+	Write X
+	UnLock
+	---------
+	=>write lock
+	```
 
 ### unlocking : 제한 해제
 
@@ -518,21 +527,87 @@ int fcntl(int filedes, int cmd, struct flock *ldata);
 - cmd
 	- F_GETLK : lock 정보 얻기
 		- 해당 정보는 세번째 인수에 저장
-	- F_SETLK : non-blocking locking or unlocking
+	- F_SETLK(**UNLOCK**) : non-blocking locking or unlocking  + F_UNLCK
 		- lock 설정에 관한 자세한 정보는 세번째 인수에 저장
-	- F_SETLKW : blocking locking
+	- F_SETLKW(**LOCK**) : blocking locking 
 		- lock 설정에 관한 자세한 정보는 세번째 인수에 저장
 - struct flock *ldata
-	- short l_type
+	- short l_type : lock의 type
+		- F_RDLCK, F_WRLCK, F_UNLCK
+	- short l_whence
+		- SEEK_SET, SEEK_CUR, SEEK_END
+	- off_t l_start : l_whence로 부터의 변위를 표현된 locked record의 **시작 위치**
+	- off_t l_len : locked record의 **길이**
+	- pid_t l_pid : F_GETLK의 경우만 유효
+		- 누가 해당 file에 lock을 걸었나?
+
+### locking
+
+<img src="https://lh3.googleusercontent.com/yDLVDWyJ0Vdp6q2FuKXpKkUMFsF2_ey7Okitz0eJg4OEKJ4CPusq1YiaZ632_daMa1DpweEXPWHRVY2WvkiluX5pVhdU-21eusoSneZrQwOiwDm4uRY7BwPSHpXQE5dpy5f_GiTPuHBIgk5lftalkx46hDrDOy2SNyhZiZs7Shh2rajLtE8UFGyAZDfiJtSLaRx6TDOQNZkvSY7tahA31DXGlfyolDGg92lGb-Q5lyR5Tfu2Gz6QrDzcWXQIwcYQ88aWXOQWdd21iIN769VNsmx_G4jYCQzhldN_vbmm8jB9mfy1LQhUwUCLvzJ5XSEBv5BmzQDM6nCmft9FaNVzukjyDq1rgNBhwo5o56kB3m0LSGcOGcXpBrQUW9PRXJtcbYfTDgjuCPx7HXtKiATuwvpJbBkIbwMQblhqx2ELNH2BLg5sMn8M9wM1cNkj8_bZ4jzMYEQaR-eUHz50-9qyDldzRFHkDytv9U0v0EQ1b993uSNuGvliipx2Y58J_bWL883hZJm4w4dp3OqhVK5HnOy2NhuH_yX7VhSbND7zSYX-FT6WKQ0yGxkUPA13FHnlaDH1iageJND3CYAR09OXzYIgq4P2a5UnAklBRim8_ywsu1xifYD2DvL-hC-BOAcYzTJTeS3Zq_hPKjWGQk-kKC01IcOeRGe6owG77jMYDMKcKlRRviFtd-6vseiLdh4q9ZyMTN-O4GUpQ7ixdwHVkvFA568LnNu_gdfjoPjB_v3w9_mo=w896-h318-no" width=600px/>
+
+```
+	lock(6)
+	l_whence = SEEK_CUR
+	l_start = 6
+	l_len = 4
+```
+
+- lock 정보는 fork()에 의해 계승되지 않는다.
+	- 한 process가 lock하면 다른 child는 동시에 lock이 아닌 기다려야한다.
+- 모든 lock은 프로세스 종료 시 자동으로 unlock 된다.
+
+### 교착상태 (Deadlock)
+- 교착상태란?
+- 교착상태 검색 가능?
+	- F_SETLKW 명령에 대해 -1 return
+	- errno는 EDEADLK
+
+### locking의 사용 예
+
+```c
+int main(void) {
+		int fd, i, num;
+		struct flock lock;
+
+		fd=open("data1", O_RDWR | O_CREAT, 0600);
 
 
+		lock.l_whence=SEEK_CUR;
+		lock.l_len=sizeof(int);
+
+		for(i=0;i<10;i++){
+				lock.l_type=F_WRLCK;
+				lock.l_start=0;
+				fcntl(fd, F_SETLKW, &lock);
+
+				read(fd, &num, sizeof(int));
+				num=num+10;
+				sleep(1);
+
+				lseek(fd, -sizeof(int), SEEK_CUR);
+				write(fd, &num, sizeof(int));
+
+				lock.l_type=F_UNLCK;
+				lock.l_start=-sizeof(int);	// -sizeof(int)인 이유? -> 쓰는만큼 풀어야함
+				fcntl(fd, F_SETLK, &lock);
+		}
+
+		lseek(fd, 0, SEEK_SET);
+		for(i=0;i<10;i++){
+				read(fd, &num, sizeof(int));
+				printf("%d\n", num);
+		}
+
+		return 0;
+}
+```
 
 <!--stackedit_data:
-eyJoaXN0b3J5IjpbNzMyMjI3ODksNzgyNDMwNjQzLC0xOTY5MD
-M0NzE1LDE3NzE3NTU3NjMsLTEyODc0NDU0MjUsLTE0MTA5Mzcy
-MjcsLTE4MTM0NzQ5OTYsMTE5MzU5MTg5NywxMjg1NTYwMDMyLD
-E2NTc5MTI0ODIsLTEzMTE4MjkxMDcsOTg5NzY4MDMxLDg4MzQ0
-MTk5NCwxMzIxNzY2Mjk1LC0xMzYxNTY5MDExLDE5OTIwOTgwNz
-ksNzM3OTcxNjkyLDU5NjA4MzQwNSwtMzQ5ODU5OTMzLC0xMDQx
-NDQzODkxXX0=
+eyJoaXN0b3J5IjpbNTU2MjgyNTIxLC0yNjEzOTQ1MTQsNzgyND
+MwNjQzLC0xOTY5MDM0NzE1LDE3NzE3NTU3NjMsLTEyODc0NDU0
+MjUsLTE0MTA5MzcyMjcsLTE4MTM0NzQ5OTYsMTE5MzU5MTg5Ny
+wxMjg1NTYwMDMyLDE2NTc5MTI0ODIsLTEzMTE4MjkxMDcsOTg5
+NzY4MDMxLDg4MzQ0MTk5NCwxMzIxNzY2Mjk1LC0xMzYxNTY5MD
+ExLDE5OTIwOTgwNzksNzM3OTcxNjkyLDU5NjA4MzQwNSwtMzQ5
+ODU5OTMzXX0=
 -->
