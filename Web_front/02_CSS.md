@@ -267,7 +267,7 @@ div {
 <details>
     <summary>output</summary>
 
-<span style="color:red; font-size:30px;">Hello world!</span>
+<span style="color:red; font-size:30px;">Hello world!(red)</span>
 </details>
 
 <br><br>
@@ -288,7 +288,7 @@ div {
 <details>
     <summary>output</summary>
 
-<span style="color:red; font-size:30px;">Hello world!</span>
+<span style="color:red; font-size:30px;">Hello world!(red)</span>
 </details>
 
 <br><br><br>
@@ -331,8 +331,8 @@ h1.span, div.classname {color:red}
 <details>
     <summary>output</summary>
 
-<span style="color:red; font-size:30px;">span tag in</span><br>
-<span style="color:red; font-size:30px;">span tag out</span>
+<span style="color:red; font-size:30px;">span tag in(red)</span><br>
+<span style="color:red; font-size:30px;">span tag out(red)</span>
 </details>
 
 <br><br>
@@ -356,7 +356,7 @@ h1.span, div.classname {color:red}
     <summary>output</summary>
 
 <span style="color:black; font-size:30px;">span tag in</span><br>
-<span style="color:red; font-size:30px;">span tag out</span>
+<span style="color:red; font-size:30px;">span tag out(red)</span>
 </details>
 
 
@@ -382,7 +382,7 @@ h1.span, div.classname {color:red}
     <summary>output</summary>
 
 <span>단락 선택</span><br>
-<span style="color:red">첫번째 단락입니다.</span><br>
+<span style="color:red">첫번째 단락입니다.(red)</span><br>
 <span>두번째 단락입니다.</span><br>
 <span>세번째 단락입니다.</span><br>
 <span>네번째 단락입니다.</span>
