@@ -65,15 +65,26 @@ void BellmanFordShortestPath(Vertices* s) {
 	s->d_label = 0;														// 2. d(s) <- 0
 	
 	for (int i = 1; i < n; i++) {										// 3. for i <- 1 to n - 1
+		//printf("i = %d==============================\n", i);
 		for (int j = 1; j <= m; j++) {									//		for each e E G.edges()
 			u = &digrp.vertex[digrp.edges[j].origin];					//			u <- G.origin(e)
 			z = &digrp.vertex[digrp.edges[j].dest];						//			z <- G.opposite(u, e)
+<<<<<<< HEAD
 			if (u->d_label == INFINITE || digrp.edges[j].weight == INFINITE)
 				continue;
 			min = u->d_label + digrp.edges[j].weight;
 			if (z->d_label > min) {	// d(z) <- min (d(z), d(u) + w(u,z))
 				z->d_label = min;
 			}
+=======
+			//printf("u -> %d z -> %d\n", u->num, z->num);
+			//printf("before : z -> %d\n", z->d_label);
+			if (z->d_label > (u->d_label + digrp.edges[j].weight)) {	// d(z) <- min (d(z), d(u) + w(u,z))
+				z->d_label = (u->d_label + digrp.edges[j].weight);
+			}
+			//printf("after : z -> %d\n", z->d_label);
+			//printf("---------------------------\n");
+>>>>>>> 761bbbe... Update BellmanFordShortestPath.c
 		}
 	}
 }
