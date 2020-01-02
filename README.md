@@ -16,17 +16,17 @@ Dream to be a JAVA developer & JAVA Backend developer!!
 
 ## Goals
 - General things
-    - 1. algorithm
-    - 2. Data structure
+    1. algorithm
+    2. Data structure
 - JAVA
-    - 1. All about JAVA (Basic to enhancement)
-    - 2. JSP
-    - 3. + Android App
+    1. All about JAVA (Basic to enhancement)
+    2. JSP
+    3. \+ Android App
 - BACKEND
-    - 1. SpringFramework
-    - 2. SpringBoot
-    - 3. Node.js(w/JavaScript)
-    - 4. DB(RDBMS-mysql, Nosql-MongoDB)
+    1. SpringFramework
+    2. SpringBoot
+    3. Node.js(w/JavaScript)
+    4. DB(RDBMS-mysql, Nosql-MongoDB)
 
 updating continued...
 
