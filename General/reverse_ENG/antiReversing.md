@@ -1,4 +1,9 @@
-# AntiReversing
+# Anti-Reversing
+## Anti-Reversing?
+Anti-Reversing은 Anti-Debugging으로 reverse engineering을 통한 debugging의 접근을 막는것이다.
+
+<br>
+
 ## 디버거 vs 디버기?
 
 - 디버거 : 디버그를 하는쪽
@@ -280,3 +285,97 @@ spy++을 통해 찾은 Control ID로 MFC Message Map을 다음과 같이 분석�
   	- \+ `0x00c` Flags : (R) 00000002
 	- \+ `0x010` ForceFlags : (R) 00000000
 	> (R) = real mode
+
+  ### 20. RDTSC ( 시간 탐지 기법 )
+  ```
+  (time1)
+  (operation)
+  (time2)
+  ```
+  - 어떤 작업하기 전 time1 측정, 작업 후 time2 측정
+  - time2 - time1해서 시간 차가 크게 나면 debug 사용임을 감지
+  - 우회법
+  	- 1. RDTSC 코드를 debug 후 한번더 time1에서 다시 내려오는 JMP표현
+	- 2. (time2 - time1)의 차를 조정
+	
+  ### 21. INT3
+  - INT3(Interrupt3) : User level Interrupt = breakpoint
+  - INT3는 debug mode에서만 사용된다. (real mode에서 사용하면 error)
+  	- 임의의 program에서 처음 실행의 binary code 처음 1Byte를 `CC`로 변경 후 저장하고 실행
+	- Error 확인
+	
+  ```c
+  int main(void) {
+  	int n1, n2;
+	int result;
+	scanf("%d", &n1);
+	scanf("%d", &n2);		// divided by zero
+	result = n1 / n2;
+  }
+  ```
+  
+  - runtime 중 Exception(예외) -> Exception handle(예외 처리)
+  	- 있음 -> runtime 유지
+	- 없음 -> runtime error
+	
+  ```
+  try {
+  	__asm {
+			INT3
+	}
+  } catch, except, exception ...() {
+  	(예외 처리)	
+  }
+  ```
+  - 우회
+  	- 1. `Shift + F9`를 누르면 예외를 처리하지 않고 무시하고 진행한다.
+	- 2. Debugging options에 Exception tab에 예외 처리를 따로 체크한다.
+	
+  ### Self-Debugging
+  - `self-debugging`이 시작하고 자기 자신을 하나 더(`self-debugging'`) 실행한다. 
+  - `self'`이 `self`를 debug(`DebugActiveProcess`)한다.
+  - 규칙
+  	- `debuggee`는 `debugger`를 하나만 둘 수 있다.
+	
+  #### Self-Debugging 우회
+  - 1. 일부러 error를 만든다. (실행 처음에 E8값을 CC로 변경하여 강제로 `INT3`를 준다)
+  - 2. 변경 내용을 저장한다. (다른이름으로 저장이 아닌 Overwrite해서)
+  - 3. 실행을 해서 `디버그`버튼을 누르면 VS로 연동된다. 다시 OllyDbg오 연동하기 위해서는 OllyDbg를 다시 키고 `Debug`-`Just-in-time debugging`옵션에서 `Make OllyDbg just-in-time debugger`를 활성화한다.
+  - 4. 다시 CC의 값을 E8로 변경하고, CreateProcess에 breakpoint를 걸고 실행
+  - 5. `F8`로 프로시저단위 디버깅을 하면 사본이 생성된다.
+  - 6. 사본에서 다시 CC를 E8로 변경하고 `DebugActiveProcess`에 breakpoint를 걸어준다.
+  
+  ### Olly Advanced
+  - Anti Reversing을 하기 위한 우회를 도와주는 라이브러리이다.
+  - 포함된 2개의 file을 OllyDbg가 설치된 경로의 plugin directory(ex. `C:\odbg110\plugin`)로 복사
+  - 과정
+  	- 1. OllyDbg 실행 후
+	- 2. `Plugins`-`options`-`Anti-Debug2`에 `isDebuggerPresent`항목 체크 후 다시 실행
+  	- 3. 우회된 것 확인
+  > 도구를 사용해서 하는 것이 더 좋을 수 도 있음. 코드를 해결하기 보다는 **코드 분석에 초점**을 맞춰야 한다.
+  
+  ### AntiQuiz3
+  - MFC를 통해 event처리를 하는 code지만 event보다는 도달하는 과정에서 막힘을 인지한다.
+  - OnInitDialog가 main역할을 한다.
+  	- 하위에 `GetSystemMenu`, `LoadString`, `IsEmpty` ...이 나오는걸 확인하고
+	- 여기서 막히는 부분은 //TODO에 있는 `AntiDebug1-4()`부분이다.
+	- `AntiDebug1-3`은 위의 방식과 비슷하나, `AntiDebug4()`에서 조금 막힌다.
+	- PBE + 0x0c부분은 LDR_DATA이다. 
+	- LDR은 동적할당을 확정적으로 한다. 이 프로그램의 debug 모드에서 컴파일러가 동적메모리임을 인식하기 위해서 `0xEEFEEEFE`를 맨 마지막에 넣는다.
+	```cpp
+	__try {
+		while (*ldr_module != 0xEEFEEEFE) {
+			printf("Value at pointer: %08X\n", *ldr_module);
+			walk = walk +0x01;
+			ldr_module = (const DWORD *)walk;
+		}
+
+	}
+	__except (EXCEPTION_EXECUTE_HANDLER) {
+		flag = 1;
+	}
+	```
+	- 위의 코드로 무한루프를 통해 예외를 발생하면서 동적메모리를 인식하기 위해 넣은 `0xEEFEEEFE`를 인식한다.
+	- 우회법
+		- 1. 가장쉬운법은 `AntiDebugger1-4`를 호출하지 않는다. ( 밀어버림 )
+		
