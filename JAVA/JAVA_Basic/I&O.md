@@ -22,7 +22,7 @@
         InputStream inputStream = null;
         
         try {
-            inputStream = new FileInputStream("C:\\Users\\LeeSiHyeong\\java_Basic\\pjtTest\\src\\pjtTest\\Hello.txt");
+            inputStream = new FileInputStream("[path]");
             int data = 0;
             
             while(true) {
@@ -52,7 +52,7 @@
         // read(byte[])
         InputStream inputStream = null;
         try {
-            inputStream = new FileInputStream("C:\\Users\\LeeSiHyeong\\java_Basic\\pjtTest\\src\\pjtTest\\Hello.txt");
+            inputStream = new FileInputStream("[path]");
             int data = 0;
             byte[] bs = new byte[3];
                 
@@ -113,7 +113,7 @@
         // write()
         OutputStream outputStream = null;
         try {
-            outputStream = new FileOutputStream("C:\\Users\\ LeeSiHyeong\java_Basic\\pjtTest\\src\\pjtTest\\HelloW.txt");
+            outputStream = new FileOutputStream("[path]");
             String data = "Hello java world!!";
             byte[] arr = data.getBytes();            
             try {
@@ -166,8 +166,8 @@
         OutputStream outputStream = null;
         
         try {
-            inputStream = new FileInputStream("C:\\Users\\LeeSiHyeong\\java_Basic\\pjtTest\\src\\pjtTest\\Hello.txt");
-            outputStream = new FileOutputStream("C:\\Users\\LeeSiHyeong\\java_Basic\\pjtTest\\src\\pjtTest\\HelloWW.txt");
+            inputStream = new FileInputStream("[path1]");
+            outputStream = new FileOutputStream("[path2]");
             
             byte[] arr = new byte[3];
             
@@ -206,7 +206,7 @@ byte 단위의 입출력을 개선해 문자열을 좀 더 편리하게 다룰 �
     DataOutputStream dataOutputStream = null;
         
     try {
-        outputStream = new FileOutputStream("C:\\Users\\LeeSiHyeong\\java_Basic\\pjtTest\\src\\pjtTest\\HelloWW.txt");
+        outputStream = new FileOutputStream("[path]");
         dataOutputStream = new DataOutputStream(outputStream);
             
         dataOutputStream.writeUTF(str);
@@ -237,12 +237,12 @@ byte 단위의 입출력을 개선해 문자열을 좀 더 편리하게 다룰 �
     DataOutputStream dataOutputStream = null;
     
     try {
-        inputStream = new FileInputStream(arg0);
+        inputStream = new FileInputStream("[path1]");
         dataInputStream = new DataInputStream(inputStream);
         
         String str = dataInputStream.readUTF();
         
-        outputStream = new FileOutputStream(arg0);
+        outputStream = new FileOutputStream("[path2]");
         dataOutputStream = new DataOutputStream(outputStream);
         
         dataOutputStream.writeUTF(str);
@@ -264,3 +264,68 @@ byte 단위의 입출력을 개선해 문자열을 좀 더 편리하게 다룰 �
     ```
 </details>
 
+<details>
+    <summary>BufferedReader</summary>
+    ```java
+        String fileName = "[path]";
+        
+        BufferedReader br = null;
+        FileReader fr = null;
+        
+        try {
+            fr = new FileReader(fileName);
+            br = new BufferedReader(fr);
+            
+            String strLine;
+            
+            while ((strLine = br.readLine()) != null) {
+                System.out.println(strLine);
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        } finally {
+            
+            try {
+                if(br != null) br.close();
+                if(fr != null) fr.close();
+            } catch (IOException e2) {
+                e2.printStackTrace();
+            }
+        }
+    ```
+</details>
+
+<details>
+    <summary>BufferedWriter</summary>
+    ```java
+        String fileName = "[path]";
+        
+        BufferedWriter bw = null;
+        FileWriter fw = null;
+        
+        try {
+            
+            StringBuffer str = new StringBuffer("Hello Java World~~\n");
+            str.append("Hello C World~~\n");
+            str.append("Hello C++ World~~\n");
+            
+            String sstr = new String(str);
+            
+            fw = new FileWriter(fileName);
+            bw = new BufferedWriter(fw);
+            bw.write(sstr);
+            
+            System.out.println("end");
+            
+        } catch (IOException e) {
+            e.printStackTrace();
+        } finally {
+            try {
+                if(bw != null) bw.close();
+                if(fw != null) fw.close();
+            } catch (IOException e2) {
+                e2.printStackTrace();
+            }
+        }
+    ```
+</details>
