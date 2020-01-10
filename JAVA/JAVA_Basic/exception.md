@@ -1,6 +1,7 @@
 # Exception
 
 **Exception?** vs **Error?**
+
 - Exception : 개발자가 대처할 수 있음.
 - Error : 전기가 끊김, H/W적 문제 등 개발자가 대처할 수 없음
 
@@ -15,6 +16,8 @@
     + `NullPointerException` : 객체를 가리키지 않고 있는 래퍼런스를 이용할 때
     + `ArrayIndexOutOfBoundException` : 배열에서 존재하지 않는 인덱스를 가리킬 때
     + `NumberFormatException` : 숫자데이터에 문자데이터등을 넣었을 때
+
+<br>
 
 ## Try ~ Catch ~ Finally
 
