@@ -3,6 +3,9 @@
 - Input : Program -> I/O target
 - Output : Program <- I/O target
 
+<br>
+
+## hierarchy of Class
 - InputStream
     + FileInputStream
     + DataInputStream
@@ -12,8 +15,9 @@
     + DataOutputStream
     + BufferedOutputStream
 
-## FileInputStream / FileOutputStream
-### FileInputStream
+<br>
+
+## FileInputStream
 
 <details>
     <summary>read() : 1byte씩 읽음</summary>
@@ -46,6 +50,7 @@
         }
     ```
 </details>
+
 <details>
     <summary>read(byte[]); : byte[] 배열크기만큼 읽음</summary>
     ```java
@@ -106,7 +111,7 @@
 
 <br>
 
-### FileOutputStream
+## FileOutputStream
 <details>
     <summary>write(byte[] b); : 전체 쓰기</summary>
     ```java
